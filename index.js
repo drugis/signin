@@ -1,25 +1,11 @@
 'use strict';
 const SIGNIN_ERROR = 'drugisSigninError';
-module.exports = function(db) {
-  var bcrypt = require('bcrypt');
-  var passport = require('passport');
+var bcrypt = require('bcrypt');
+var passport = require('passport');
 
+module.exports = function(dbConnection) {
   function useLocalLogin(app) {
-    var LocalStrategy = require('passport-local').Strategy;
-    passport.use(new LocalStrategy(
-      function(username, password, callback) {
-        findUserByUsername(username, function(error, user) {
-          if (error) { return callback(error); }
-          if (!isValidPassword(password, user.password)) {
-            return callback({
-              type: SIGNIN_ERROR,
-              message: 'Invalid password'
-            });
-          }
-          return callback(null, user);
-        });
-      })
-    );
+    passport.use(createLocalStrategy());
     initializePassport(app);
     app
       .post('/login',
@@ -29,16 +15,27 @@ module.exports = function(db) {
         })
       );
   }
-  
+
+  function createLocalStrategy() {
+    var LocalStrategy = require('passport-local').Strategy;
+    return new LocalStrategy(findAndValidateUser);
+  }
+
+  function findAndValidateUser(username, password, callback) {
+    findUserByUsername(username, function(error, user) {
+      if (error) { return callback(error); }
+      if (!isValidPassword(password, user.password)) {
+        return callback({
+          type: SIGNIN_ERROR,
+          message: 'Invalid password'
+        });
+      }
+      return callback(null, user);
+    });
+  }
+
   function useGoogleLogin(app) {
-    var GoogleStrategy = require('passport-google-oauth20').Strategy;
-    passport.use(new GoogleStrategy({
-      clientID: process.env.MCDAWEB_GOOGLE_KEY,
-      clientSecret: process.env.MCDAWEB_GOOGLE_SECRET,
-      callbackURL: process.env.MCDA_HOST + '/auth/google/callback'
-    },
-      findOrCreateUser
-    ));
+    passport.use(createGoogleStrategy());
     initializePassport(app);
     app
       .get('/auth/google/', passport.authenticate('google', { scope: ['profile', 'email'] }))
@@ -47,7 +44,18 @@ module.exports = function(db) {
         successRedirect: '/',
       }));
   }
-  
+
+  function createGoogleStrategy() {
+    var GoogleStrategy = require('passport-google-oauth20').Strategy;
+    return new GoogleStrategy({
+      clientID: process.env.MCDAWEB_GOOGLE_KEY,
+      clientSecret: process.env.MCDAWEB_GOOGLE_SECRET,
+      callbackURL: process.env.MCDA_HOST + '/auth/google/callback'
+    },
+      findOrCreateUser
+    );
+  }
+
   function initializePassport(app) {
     passport.serializeUser(function(user, cb) {
       cb(null, user);
@@ -61,7 +69,7 @@ module.exports = function(db) {
   }
 
   function findOrCreateUser(accessToken, refreshToken, googleUser, callback) {
-    db.runInTransaction(userTransaction, function(error, result) {
+    dbConnection.runInTransaction(userTransaction, function(error, result) {
       if (error) {
         return callback(error);
       }
@@ -74,7 +82,7 @@ module.exports = function(db) {
         [googleUser.id, googleUser.emails[0].value],
         function(error, result) {
           if (error) { return callback(error); }
-          
+
           var defaultPicture = process.env.MCDA_HOST + '/public/images/defaultUser.png';
           if (result.rows.length === 0) {
             createAccount(client, googleUser, defaultPicture, callback);
@@ -107,16 +115,12 @@ module.exports = function(db) {
       });
   }
 
-  function findUserById(id, callback) {
-    findUserByProperty('id', id, callback);
-  }
-
   function findUserByEmail(email, callback) {
     findUserByProperty('email', email, callback);
   }
 
   function findUserByUsername(username, callback) {
-    db.query('SELECT id, username, firstName, lastName, password FROM Account WHERE username = $1',
+    dbConnection.query('SELECT id, username, firstName, lastName, password FROM Account WHERE username = $1',
       [username], function(error, result) {
         if (error) {
           callback(error);
@@ -136,7 +140,7 @@ module.exports = function(db) {
   }
 
   function findUserByProperty(property, value, callback) {
-    db.query('SELECT id, username, firstName, lastName, email FROM Account WHERE ' + property + ' = $1',
+    dbConnection.query('SELECT id, username, firstName, lastName, email FROM Account WHERE ' + property + ' = $1',
       [value], function(error, result) {
         if (error) {
           callback(error);
@@ -150,11 +154,7 @@ module.exports = function(db) {
 
   return {
     SIGNIN_ERROR: SIGNIN_ERROR,
-    findOrCreateUser: findOrCreateUser,
-    findUserById: findUserById,
     findUserByEmail: findUserByEmail,
-    findUserByUsername: findUserByUsername,
-    isValidPassword: isValidPassword,
     useLocalLogin: useLocalLogin,
     useGoogleLogin: useGoogleLogin
   };

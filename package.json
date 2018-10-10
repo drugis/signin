@@ -23,7 +23,9 @@
     "passport-local": "^1.0.0"
   },
   "devDependencies": {
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "proxyquire": "^2.1.0",
+    "sinon": "^6.3.5"
   },
   "engines": {
     "yarn": ">= 1.0.0"
