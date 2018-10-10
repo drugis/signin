@@ -12,7 +12,7 @@ module.exports = function(db) {
           if (error) { return callback(error); }
           if (!isValidPassword(password, user.password)) {
             return callback({
-              type: 'loginError',
+              type: SIGNIN_ERROR,
               message: 'Invalid password'
             });
           }
@@ -122,7 +122,7 @@ module.exports = function(db) {
           callback(error);
         } else if (result.rows.length === 0) {
           callback({
-            type: 'loginError',
+            type: SIGNIN_ERROR,
             message: 'username ' + username + ' not found'
           });
         } else {
