@@ -49,7 +49,7 @@ module.exports = function(dbConnection, appEnvironmentSettings) {
     var GoogleStrategy = require('passport-google-oauth20').Strategy;
     return new GoogleStrategy({
       clientID: appEnvironmentSettings.googleKey,
-      clientSecret: appEnvironmentSettings.googleSecrect,
+      clientSecret: appEnvironmentSettings.googleSecret,
       callbackURL: appEnvironmentSettings.host + '/auth/google/callback'
     },
       findOrCreateUser
