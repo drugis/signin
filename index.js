@@ -3,7 +3,7 @@ const SIGNIN_ERROR = 'drugisSigninError';
 var bcrypt = require('bcrypt');
 var passport = require('passport');
 
-module.exports = function(dbConnection) {
+module.exports = function(dbConnection, appEnvironmentSettings) {
   function useLocalLogin(app) {
     passport.use(createLocalStrategy());
     initializePassport(app);
@@ -48,9 +48,9 @@ module.exports = function(dbConnection) {
   function createGoogleStrategy() {
     var GoogleStrategy = require('passport-google-oauth20').Strategy;
     return new GoogleStrategy({
-      clientID: process.env.MCDAWEB_GOOGLE_KEY,
-      clientSecret: process.env.MCDAWEB_GOOGLE_SECRET,
-      callbackURL: process.env.MCDA_HOST + '/auth/google/callback'
+      clientID: appEnvironmentSettings.googleKey,
+      clientSecret: appEnvironmentSettings.googleSecrect,
+      callbackURL: appEnvironmentSettings.host + '/auth/google/callback'
     },
       findOrCreateUser
     );
@@ -83,7 +83,7 @@ module.exports = function(dbConnection) {
         function(error, result) {
           if (error) { return callback(error); }
 
-          var defaultPicture = process.env.MCDA_HOST + '/public/images/defaultUser.png';
+          var defaultPicture = appEnvironmentSettings.host + '/public/images/defaultUser.png';
           if (result.rows.length === 0) {
             createAccount(client, googleUser, defaultPicture, callback);
           } else {
