@@ -1,6 +1,6 @@
 {
   "name": "signin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Signin module",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "homepage": "https://github.com/drugis/signin#readme",
   "dependencies": {
     "bcrypt": "^3.0.1",
-    "passport": "^0.4.0",
+    "passport": "passport-next/passport#^2.1.0",
     "passport-google-oauth20": "^1.0.0",
     "passport-local": "^1.0.0"
   },

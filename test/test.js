@@ -9,9 +9,14 @@ var dbConnection = {
 };
 var app = {};
 
+var appEnvironmentSettings = {
+  googleKey: 'googleKey',
+  googleSecret: 'verySecret',
+  host: 'testingHost'
+};
 var signin = proxyquire('../index', {
   'passport': passport,
-})(dbConnection);
+})(dbConnection, appEnvironmentSettings);
 var appUseUseSpy;
 var appGetGetSpy;
 
