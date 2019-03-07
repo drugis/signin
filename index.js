@@ -50,7 +50,8 @@ module.exports = function(dbConnection, appEnvironmentSettings) {
     return new GoogleStrategy({
       clientID: appEnvironmentSettings.googleKey,
       clientSecret: appEnvironmentSettings.googleSecret,
-      callbackURL: appEnvironmentSettings.host + '/auth/google/callback'
+      callbackURL: appEnvironmentSettings.host + '/auth/google/callback',
+      userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo'
     },
       findOrCreateUser
     );
