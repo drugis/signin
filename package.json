@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/drugis/signin#readme",
   "dependencies": {
-    "bcrypt": "^3.0.7",
+    "bcrypt": "^5.0.0",
     "passport": "passport-next/passport#^3.1.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0"
