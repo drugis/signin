@@ -5,7 +5,7 @@ var sinon = require('sinon');
 
 var passport = {};
 var dbConnection = {
-  query: () => { }
+  query: () => {}
 };
 var app = {};
 
@@ -15,7 +15,7 @@ var appEnvironmentSettings = {
   host: 'testingHost'
 };
 var signin = proxyquire('../index', {
-  'passport': passport,
+  passport: passport
 })(dbConnection, appEnvironmentSettings);
 var appUseUseSpy;
 var appGetGetSpy;
@@ -161,9 +161,11 @@ describe('the signin module', () => {
   describe('findUserByEmail', () => {
     describe('for valid emails', () => {
       var result = {
-        rows: [{
-          id: 1
-        }]
+        rows: [
+          {
+            id: 1
+          }
+        ]
       };
       beforeEach(() => {
         sinon.stub(dbConnection, 'query').onCall(0).yields(null, result);
@@ -173,9 +175,14 @@ describe('the signin module', () => {
       });
       it('should call the callback with the result', (done) => {
         var email = 'foo@bar.com';
-        signin.findUserByEmail(email, function(err, user) {
+        signin.findUserByEmail(email, function (err, user) {
           assert(!err);
-          assert(dbConnection.query.calledWith('SELECT id, username, firstName, lastName, email FROM Account WHERE email = $1', [email]));
+          assert(
+            dbConnection.query.calledWith(
+              'SELECT id, username, firstName, lastName, email FROM Account WHERE email = $1',
+              [email]
+            )
+          );
           assert.equal(result.rows[0], user);
           done();
         });
@@ -193,10 +200,15 @@ describe('the signin module', () => {
       });
       it('should call the callback with an error', (done) => {
         var email = 'foo@bar.com';
-        signin.findUserByEmail(email, function(err, user) {
+        signin.findUserByEmail(email, function (err, user) {
           assert(!user);
           assert.equal('email ' + email + ' not found', err);
-          assert(dbConnection.query.calledWith('SELECT id, username, firstName, lastName, email FROM Account WHERE email = $1', [email]));
+          assert(
+            dbConnection.query.calledWith(
+              'SELECT id, username, firstName, lastName, email FROM Account WHERE email = $1',
+              [email]
+            )
+          );
           done();
         });
       });
@@ -211,10 +223,15 @@ describe('the signin module', () => {
       });
       it('should pass them on', (done) => {
         var email = 'foo@bar.com';
-        signin.findUserByEmail(email, function(err, user) {
+        signin.findUserByEmail(email, function (err, user) {
           assert(!user);
           assert.equal(error, err);
-          assert(dbConnection.query.calledWith('SELECT id, username, firstName, lastName, email FROM Account WHERE email = $1', [email]));
+          assert(
+            dbConnection.query.calledWith(
+              'SELECT id, username, firstName, lastName, email FROM Account WHERE email = $1',
+              [email]
+            )
+          );
           done();
         });
       });
